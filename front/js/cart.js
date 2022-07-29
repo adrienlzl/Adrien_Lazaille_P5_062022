@@ -111,13 +111,19 @@ const displayProduct = (data, product) => {
 
         const newQuantity = e.target.value;
 
-        myBasket.forEach( (p) => {
-            if(p.idProduct === product.idProduct && p.colorOfProduct === product.colorOfProduct) {
-                p.quantityOfProduct = newQuantity
+        myBasket.forEach((p) => {
+            if (p.idProduct === product.idProduct && p.colorOfProduct === product.colorOfProduct && p.quantityOfProduct >= 0 && p.quantityOfProduct <= 101) {
+                p.quantityOfProduct = parseInt(newQuantity, 10);
+
+            }
+            if (p.quantityOfProduct <= 0 || p.quantityOfProduct >= 101) {
+                p.quantityOfProduct = 1
+                //displayCart();
             }
         })
         console.log(myBasket)
         localStorage.setItem("productBasket", JSON.stringify(myBasket));
+
 
     });
 
@@ -154,24 +160,36 @@ const displayCart = () => {
 
     const products = JSON.parse(localStorage.getItem("productBasket"));
 
+    if (products === null) {
+        const parentMessageEmptyBasket = document.getElementById('cart__items');
+        const messageEmptyBasket = document.createElement('p');
+        messageEmptyBasket.style.color = "#0909a1";
+        messageEmptyBasket.style.textAlign = "center";
+        messageEmptyBasket.style.letterSpacing = "1px";
+        messageEmptyBasket.style.fontWeight = "bold";
+        messageEmptyBasket.innerText = "Votre panier est vide";
+        parentMessageEmptyBasket.appendChild(messageEmptyBasket)
+    }
+    if (products != null) {
 
-   products.forEach(async (product) => {
-        const response = await fetch('http://localhost:3000/api/products/' + product.idProduct);
-        const data = await response.json();
-        const {quantity, total} = displayProduct(data, product);
+        products.forEach(async (product) => {
+            const response = await fetch('http://localhost:3000/api/products/' + product.idProduct);
+            const data = await response.json();
+            const {quantity, total} = displayProduct(data, product);
 
-        // Pour le nombre d'articles total.
-        nbArticles += quantity;
 
-       // pour le prix total
-        totalPrice += total;
+            // Pour le nombre d'articles total.
+            nbArticles += quantity;
 
-       const totalQuantity = document.getElementById('totalQuantity');
-        totalQuantity.innerText = nbArticles;
-        const finalPrice = document.getElementById('totalPrice');
-        finalPrice.innerText = totalPrice;
-    });
+            // pour le prix total
+            totalPrice += total;
 
+            const totalQuantity = document.getElementById('totalQuantity');
+            totalQuantity.innerText = nbArticles;
+            const finalPrice = document.getElementById('totalPrice');
+            finalPrice.innerText = totalPrice;
+        });
+    }
 
 }
 displayCart();
@@ -190,52 +208,71 @@ const addressErrorMsg = document.getElementById('addressErrorMsg');
 const cityErrorMsg = document.getElementById('cityErrorMsg');
 const emailErrorMsg = document.getElementById('emailErrorMsg');
 
-//ecouter l'ecriture des champs du formulaire
-
-
-//les regex du formulaire
-const regExPrenomNomVille = (value) => {
-    return /^[a-zA-Z]{3,20}$/.test(value);
-}
-const regExEmail = (value) => {
-    return /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,3}$/.test(value);
-}
-const regExAdresse = (value) => {
-    return /^[a-zA-Z0-9\s,'-]*$/.test(value);
-}
+//Creation des Regex
+const simpleRegex = /^[a-zA-Z]{3,20}$/;
+const adressRegex = /^[a-zA-Z0-9\s,'-]*$/;
+const emailRegex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,3}$/;
 
 
 // Pour la validation du formulaire
 order.addEventListener("click", (e) => {
+    e.preventDefault()
     //controle de validé des champs du formulaire
+    if (!simpleRegex.test(firstName.value)) {
+        firstNameErrorMsg.innerText = 'Merci de saisir votre prénom correctement (les chiffres et symbole ne sont pas autorisé)';
+    } else {
+        firstNameErrorMsg.remove()
+    }
+    if (!simpleRegex.test(lastName.value)) {
+        lastNameErrorMsg.innerText = 'Merci de saisir votre nom correctement (les chiffres et symbole ne sont pas autorisé)';
+    } else {
+        lastNameErrorMsg.remove()
+    }
+    if (!adressRegex.test(address.value)) {
+        addressErrorMsg.innerText = 'Merci de saisir votre adresse postale correctement';
+    } else {
+        addressErrorMsg.remove()
+    }
+    if (!simpleRegex.test(city.value)) {
+        cityErrorMsg.innerText = 'Merci de saisir votre adresse correctement (les chiffres et symbole ne sont pas autorisé)';
+    } else {
+        cityErrorMsg.remove()
+    }
+    if (!emailRegex.test(email.value)) {
+        emailErrorMsg.innerText = 'Merci de saisir votre adresse mail correctement (xxxx@xxx.xxx)'
+    } else {
+        emailErrorMsg.remove()
+    }
+    if (simpleRegex.test(firstName.value) && simpleRegex.test(lastName.value) && adressRegex.test(address.value) && simpleRegex.test(city.value) && emailRegex.test(email.value)) {
 
-    if (!regExPrenomNomVille(firstName.value)) {
-        firstNameErrorMsg.innerText = 'Merci de saisir votre prénom'
-    }
-    if (!regExPrenomNomVille(lastName.value)) {
-        lastNameErrorMsg.innerText = 'Merci de saisir votre nom'
-    }
-    if (!regExAdresse(address.value)) {
-        addressErrorMsg.innerText = 'Merci de saisir votre adresse'
-    }
-    if (!regExPrenomNomVille(city.value)) {
-        cityErrorMsg.innerText = 'Merci de saisir le nom de votre ville'
-    }
-    if (!regExEmail(email.value)) {
-        emailErrorMsg.innerText = 'Merci de saisir votre adresse mail'
-    }
-    if (regExPrenomNomVille(firstName.value) && regExPrenomNomVille(lastName.value) && regExAdresse(address.value) && regExPrenomNomVille(city.value) && regExEmail(email.value)) {
-        e.preventDefault()
-        const contact = {
-                prénom: firstName.value,
-                nomDeFamille: lastName.value,
-                adresse: address.value,
-                ville: city.value,
+        const body = {
+            contact: {
+                firstName: firstName.value,
+                lastName: lastName.value,
+                address: address.value,
+                city: city.value,
                 email: email.value,
-                lesProduits: myBasket,
-            }
-            localStorage.setItem("Ordered", JSON.stringify(contact));
-            window.open("./confirmation.html");
+            },
+            products: myBasket.map(product => product.idProduct)
         }
-});
 
+
+        const orderProducts = fetch('http://localhost:3000/api/products/order', {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+
+        orderProducts
+            .then(response => response.json())
+            .then(data => {
+                const orderNumber = data.orderId
+                window.open("./confirmation.html?iD=" + orderNumber);
+                }
+            )
+            .catch(error => console.log(error))
+    }
+
+});
