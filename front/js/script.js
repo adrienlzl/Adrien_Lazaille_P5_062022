@@ -1,4 +1,4 @@
-// on ajoute le code html
+/** Constante pour mettre en place l'HTML **/
 const addProduct = (product) => {
     console.log(product);
     const section = document.getElementById("items");
@@ -19,14 +19,13 @@ const addProduct = (product) => {
     descriptifproduit.innerHTML = product.description;
     article.appendChild(descriptifproduit);
 }
-// on appelle l'api
+/** Constante pour appeler l'API et récupérer les infos **/
 const getproducts = async () => {
     const response = await fetch('http://localhost:3000/api/products');
 
     const data = await response.json();
 
     // mettre en place les products
-
     data.forEach((product) => {
         addProduct(product);
     });

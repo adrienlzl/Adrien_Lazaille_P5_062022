@@ -1,4 +1,4 @@
-// affichage des info du produit selectionné dans la page index
+/** Pour récupérer les infos de l'url et les récupérer **/
 const urlParams = window.location.search;
 const searchParams = new URLSearchParams(urlParams);
 const productId = searchParams.get("id");
@@ -6,7 +6,7 @@ const productId = searchParams.get("id");
 if (!productId) {
     document.location.href = "index.html";
 }
-//Pour afficher le produit qui a l'ID sélectionée
+/** Constante pour afficher les infos de l'article en fonction de son ID **/
 const getProductById = async (productId) => {
     const response = await fetch('http://localhost:3000/api/products/' + productId);
     const data = await response.json();
@@ -16,7 +16,10 @@ const getProductById = async (productId) => {
 getProductById(productId);
 
 
-//ajout de l html des infos du produit
+/**
+ * Constante pour afficher les info de l'article et rajouter le code HTML
+ * @param product
+ */
 const displayProduct = (product) => {
 
     const imageContent = document.querySelector(".item__img");
@@ -46,7 +49,7 @@ const displayProduct = (product) => {
 
 }
 
-// Ajouter au panier
+/** Pour rajouter les items au panier **/
 // on vas vérifier que les champs sont bien remplis
 const verificationOfInfo = document.getElementById("addToCart");
 //quand on click sur le panier on lance la vérification des info couleur et quantité
@@ -65,7 +68,7 @@ verificationOfInfo.addEventListener("click",
 
 
         if (colorIndex !== 0) {
-            //let errors = 0;
+
 
             if (document.getElementById('msg-color') !== null) {
                 const msgErrorElement = document.getElementById('msg-color');
@@ -121,7 +124,7 @@ verificationOfInfo.addEventListener("click",
 
     });
 
-
+/** Pour rajouter les articles au localstorage **/
 const addtoBasket = document.getElementById("addToCart");
 //quand on click sur le panier on rajoute les articles au localstorage
 addtoBasket.addEventListener("click",
@@ -133,6 +136,8 @@ addtoBasket.addEventListener("click",
         const quantitySelling = quantitySelect.value
         const numberOfQuantity = parseInt(quantitySelling);
         const itemContentAddbutton = document.querySelector(".item__content__addButton");
+
+
 
         if (numberOfQuantity > 0 && numberOfQuantity < 101 && colorIndex !== 0) {
 

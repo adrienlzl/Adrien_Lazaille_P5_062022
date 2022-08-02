@@ -1,8 +1,8 @@
-// on récupere les info du local storage
+/** On recupère les info du localstorage **/
 const myBasket = JSON.parse(localStorage.getItem("productBasket"));
 console.log(myBasket);
 
-
+/** Constante pour automatiser les rajout HTML **/
 const createMyElement = (element, classes = null, attributes = null, text = null) => {
     const newElement = document.createElement(element);
 
@@ -35,7 +35,7 @@ const createMyElement = (element, classes = null, attributes = null, text = null
 const displayProduct = (data, product) => {
     const sectionBasket = document.getElementById("cart__items");
 
-
+// Rajout du code HTML
     const myelement = createMyElement('article',
         [
             'cart__item',
@@ -106,7 +106,7 @@ const displayProduct = (data, product) => {
     }, {attribute: 'data-color', content: product.colorOfProduct}], ['Supprimer']);
     forDelete.appendChild(deleteItem);
 
-
+/**Pour changer les quantités **/
     inputQuantity.addEventListener('change', (e) => {
 
         const newQuantity = e.target.value;
@@ -126,7 +126,7 @@ const displayProduct = (data, product) => {
 
 
     });
-
+/** Pour suprimer les articles du panier **/
     deleteItem.addEventListener('click', (e) => {
         let AddRemove = myBasket.length;
         if (AddRemove == 1) {
@@ -143,14 +143,17 @@ const displayProduct = (data, product) => {
             displayCart();
         }
     });
-
+// POur faire le total Prix et quantité
     let quantity = parseInt(product.quantityOfProduct, 10);
     let total = product.quantityOfProduct * data.price;
     return {quantity, total}
 };
 
 
-// on parcourt l'array
+/**
+ * La focntion displaycart permet d'afficher les info HTML des articles du localstorage
+ *
+ */
 const displayCart = () => {
     const sectionBasket = document.getElementById("cart__items");
     sectionBasket.innerText = "";
@@ -159,7 +162,7 @@ const displayCart = () => {
     let totalPrice = 0;
 
     const products = JSON.parse(localStorage.getItem("productBasket"));
-
+// quand le panier est vide
     if (products === null) {
         const parentMessageEmptyBasket = document.getElementById('cart__items');
         const messageEmptyBasket = document.createElement('p');
@@ -214,7 +217,7 @@ const adressRegex = /^[a-zA-Z0-9\s,'-]*$/;
 const emailRegex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,3}$/;
 
 
-// Pour la validation du formulaire
+/** La partie du formulaire **/
 order.addEventListener("click", (e) => {
     e.preventDefault()
     //controle de validé des champs du formulaire
@@ -245,6 +248,8 @@ order.addEventListener("click", (e) => {
     }
     if (simpleRegex.test(firstName.value) && simpleRegex.test(lastName.value) && adressRegex.test(address.value) && simpleRegex.test(city.value) && emailRegex.test(email.value)) {
 
+        /** Pour envoyer les infos a l'API afin de récuprer le num de commande **/
+        // On envois les info du formulaire
         const body = {
             contact: {
                 firstName: firstName.value,
@@ -253,10 +258,12 @@ order.addEventListener("click", (e) => {
                 city: city.value,
                 email: email.value,
             },
+            // pour envoyer les ID des produits
             products: myBasket.map(product => product.idProduct)
         }
 
 
+        // Envois de la requête POST à l'API
         const orderProducts = fetch('http://localhost:3000/api/products/order', {
             method: "POST",
             body: JSON.stringify(body),
@@ -264,12 +271,12 @@ order.addEventListener("click", (e) => {
                 "Content-Type": "application/json"
             }
         })
-
+        // réponse de l'API
         orderProducts
             .then(response => response.json())
             .then(data => {
                 const orderNumber = data.orderId
-                window.open("./confirmation.html?iD=" + orderNumber);
+                window.open("./confirmation.html?ID=" + orderNumber);
                 }
             )
             .catch(error => console.log(error))
